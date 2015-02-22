@@ -17,36 +17,42 @@ F(n) = 0 if n == 0
        1 + min(F(n - 1), F(n/2), F(n/3)), else
 '''
 
-import collections
 
+class MinSteps(object):
+    def __init__(self, nn):
+        # num_steps[i] holds the number of steps to go from (i + 1) to 1
+        self.nn = nn
+        self.num_steps = [None] * (nn + 1)
+        self.prev_step = [None] * (nn + 1)
+        self._setup()
 
-def get_min_steps(nn):
-    # num_steps[i] holds the number of steps to go from (i + 1) to 1
-    num_steps = [None] * (nn + 1)
-    step_seq = collections.defaultdict(list)
-    idx2step = [' - 1', ' / 2', ' / 3']
+    def _setup(self):
+        self.num_steps[1] = 0
+        for ii in xrange(2, self.nn + 1):
+            minval = self.num_steps[ii - 1]
+            if ii % 2 == 0:
+                minval = min(minval, self.num_steps[ii / 2])
+            if ii % 3 == 0:
+                minval = min(minval, self.num_steps[ii / 3])
+            self.num_steps[ii] = 1 + minval
 
-    num_steps[1] = 0
-    for ii in xrange(2, nn + 1):
-        minval = num_steps[ii - 1]
-        if ii % 2 == 0:
-            minval = min(minval, num_steps[ii / 2])
-        if ii % 3 == 0:
-            minval = min(minval, num_steps[ii / 3])
-        num_steps[ii] = 1 + minval
-
-    return num_steps[nn]
+    def get_min_steps(self, ii):
+        assert ii <= self.nn
+        return self.num_steps[ii]
 
 
 def test():
+    stepper = MinSteps(10)
     for n in xrange(1, 11):
-        print n, get_min_steps(n)
+        print n, stepper.get_min_steps(n)
 
 
 if __name__ == '__main__':
     import sys
     if sys.argv[1:]:
         for ii in sys.argv[1:]:
-            print ii, get_min_steps(int(ii))
+            ii = int(ii)
+            stepper = MinSteps(ii)
+            print ii, stepper.get_min_steps(ii)
     else:
         test()
